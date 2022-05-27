@@ -56,6 +56,7 @@ describe 'ridgepole' do
             --allow-pk-change
             --create-table-with-index
             --mysql-dump-auto-increment
+            --mysql-strip-partition-options
         -r, --require LIBS
             --log-file LOG_FILE
             --verbose

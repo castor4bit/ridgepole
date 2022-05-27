@@ -83,6 +83,7 @@ Usage: ridgepole [options]
         --create-table-with-index
         --allow-pk-change
         --mysql-dump-auto-increment
+        --mysql-strip-partition-options
     -r, --require LIBS
         --log-file LOG_FILE
         --verbose

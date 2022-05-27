@@ -148,6 +148,7 @@ ARGV.options do |opt|
   opt.on('',   '--mysql-dump-auto-increment') do
     options[:mysql_dump_auto_increment] = true
   end
+  opt.on('',   '--mysql-strip-partition-options') { options[:mysql_strip_partition_options] = true }
 
   opt.on('-r', '--require LIBS', Array) { |v| v.each { |i| require i } }
   opt.on('', '--log-file LOG_FILE') { |v| options[:log_file] = v }
@@ -160,6 +161,7 @@ ARGV.options do |opt|
     exit
   end
 
+  opt.summary_width = 36
   opt.parse!
 
   if !mode || (%i[apply export].include?(mode) && !config) || (options[:with_apply] && !config)

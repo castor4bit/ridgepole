@@ -75,7 +75,7 @@ module Ridgepole
         if line.start_with?('create_table')
           pass.call
           name = line.split(/[\s,'"]+/)[1]
-          definition << line
+          definition << strip_options(line)
         elsif name
           definition << line
         end
@@ -96,6 +96,22 @@ module Ridgepole
         end
       end
       stream
+    end
+
+    def strip_options(line)
+      if Ridgepole::ConnectionAdapters.mysql? && @options[:mysql_strip_partition_options]
+        mysql_strip_partition_options(line)
+      else
+        line
+      end
+    end
+
+    def mysql_strip_partition_options(line)
+      # NOTE: Probably because of a MySQL specification change, AR::ConnectionAdapters::AbstractMysqlAdapter#table_options
+      # does not exclude partition options now. Therefore, it conflicts with ridgepole's partition support.
+      # https://github.com/rails/rails/blob/main/activerecord/lib/active_record/connection_adapters/abstract_mysql_adapter.rb
+      line.sub(%r{\\n/\*!.*\*/\n?}, '')
+          .sub(/, options: "ENGINE=InnoDB"/, '')
     end
   end
 end
