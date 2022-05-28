@@ -67,7 +67,8 @@ module Ridgepole
             { name: row[0], values: values }
           end
 
-          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, options[:type], options[:columns], partition_definitions: partition_definitions)
+          method = ActiveRecord::ConnectionAdapters::PartitionOptions.type_to_method(options[:type])
+          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, options[:columns], partition_definitions: partition_definitions)
         end
 
         def cast_value(value)

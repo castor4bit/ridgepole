@@ -18,14 +18,8 @@ module Ridgepole
           SQL
           return if partition_info.count == 0
 
-          type = case partition_info.first['PARTITION_METHOD']
-                 when 'LIST COLUMNS'
-                   :list
-                 when 'RANGE COLUMNS'
-                   :range
-                 else
-                   raise NotImplementedError, partition_info.first['PARTITION_METHOD'].to_s
-                 end
+          method = partition_info.first['PARTITION_METHOD']
+          type = ActiveRecord::ConnectionAdapters::PartitionOptions.get_type(method)
           columns = partition_info.first['PARTITION_EXPRESSION'].delete('`').split(',').map(&:to_sym)
 
           partition_definitions = partition_info.map do |row|
@@ -41,12 +35,13 @@ module Ridgepole
             { name: row['PARTITION_NAME'], values: values }
           end
 
-          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, type, columns, partition_definitions: partition_definitions)
+          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions)
         end
 
         # SchemaStatements
         def create_partition(table_name, type:, columns:, partition_definitions:)
-          execute schema_creation.accept(ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, type, columns, partition_definitions: partition_definitions))
+          method = ActiveRecord::ConnectionAdapters::PartitionOptions.type_to_method(type)
+          execute schema_creation.accept(ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions))
         end
 
         def add_partition(table_name, name:, values:)
