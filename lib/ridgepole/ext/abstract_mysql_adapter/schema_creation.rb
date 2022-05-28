@@ -7,12 +7,14 @@ module Ridgepole
     module AbstractMysqlAdapter
       module SchemaCreation
         def visit_PartitionOptions(o)
-          sqls = o.partition_definitions.map { |partition_definition| accept partition_definition }
-
           columns = o.columns.map { |column| quote_column_name(column) }.join(',')
           function = "#{o.method}(#{columns})"
 
-          "ALTER TABLE #{quote_table_name(o.table)} PARTITION BY #{function} (#{sqls.join(',')})"
+          sqls = o.partition_definitions.map { |partition_definition| accept partition_definition }
+          definitions = %i[list range].include?(o.type) ? "(#{sqls.join(',')})" : ''
+          options = %i[hash key].include?(o.type) && o.partitions > 1 ? "PARTITIONS #{o.partitions}" : ''
+
+          "ALTER TABLE #{quote_table_name(o.table)} PARTITION BY #{function} #{definitions}#{options}"
         end
 
         def visit_PartitionDefinition(o)

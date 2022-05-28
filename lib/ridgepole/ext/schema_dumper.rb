@@ -65,7 +65,20 @@ module Ridgepole
             "{ name: #{partition_definition.name.inspect}, values: #{partition_definition.values} }"
           end.join(' ,')
 
-          stream.puts "  add_partition #{partition.table.inspect}, #{partition.type.inspect}, #{partition.columns.inspect}, partition_definitions: [#{partition_definitions}]"
+          options = [
+            partition.define_num_of_partitions? ? "partitions: #{partition.partitions}" : nil,
+            partition.linear? ? 'linear: true' : nil
+          ].compact.join(', ')
+
+          params = [
+            partition.table.inspect,
+            partition.type.inspect,
+            partition.columns.inspect,
+            partition_definitions.present? ? "partition_definitions: [#{partition_definitions}]" : nil,
+            options.present? ? "options: { #{options} }" : nil
+          ].compact
+
+          stream.puts "  add_partition #{params.join(', ')}"
           stream.puts
         end
       end

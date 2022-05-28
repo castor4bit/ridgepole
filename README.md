@@ -321,7 +321,14 @@ Apply `Schemafile`
 
 ## Partitioning
 
-**Notice:** PostgreSQL `PARTITION BY` must be specified with the create_table option.
+**Notice**
+
+* PostgreSQL `PARTITION BY` must be specified with the create_table option.
+* MySQL partitioning is currently partial support
+  * Subpartitioning is not supported
+  * RANGE/LIST partitioning is always treated as COLUMNS Partitioning
+  * HASH/KEY partitioning does not support expression
+  * ALGORITHM is not supported when creating or modifying a KEY partition
 
 ### List Partitioning
 
@@ -342,6 +349,14 @@ end
 add_partition("articles", :range, :id, partition_definitions: [{ name: 'p0', values: { from: 'MINVALUE', to: 5 }}, { name: 'p1', values: { from: 5, to: 10 } }])
 # mysql
 add_partition("articles", :range, :id, partition_definitions: [{ name: 'p0', values: { to: 5 }}, { name: 'p1', values: { to: 10 } }])
+```
+
+### Hash/Key Partitioning
+
+```ruby
+# mysql
+add_partition("articles", :hash, :id, options: { partitions: 8, linear: true })
+add_partition("articles", :key, :id)
 ```
 
 ## Run tests

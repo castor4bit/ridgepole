@@ -28,20 +28,22 @@ module Ridgepole
                        { in: instance_eval("[#{row['PARTITION_DESCRIPTION'].gsub(/\(/, '[').gsub(/\)/, ']')}] # [1,2]", __FILE__, __LINE__) }
                      when :range
                        { to: instance_eval("[#{row['PARTITION_DESCRIPTION']}] # [1,2]", __FILE__, __LINE__) }
+                     when :hash, :key
+                       nil
                      else
                        raise NotImplementedError
                      end
 
-            { name: row['PARTITION_NAME'], values: values }
+            { name: row['PARTITION_NAME'], values: values } unless values.nil?
           end
 
-          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions)
+          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions.compact, partitions: partition_definitions.size)
         end
 
         # SchemaStatements
-        def create_partition(table_name, type:, columns:, partition_definitions:)
-          method = ActiveRecord::ConnectionAdapters::PartitionOptions.type_to_method(type)
-          execute schema_creation.accept(ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions))
+        def create_partition(table_name, type:, columns:, partition_definitions:, partitions:, linear:)
+          method = ActiveRecord::ConnectionAdapters::PartitionOptions.type_to_method(type, linear: linear)
+          execute schema_creation.accept(ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, columns, partition_definitions: partition_definitions, partitions: partitions))
         end
 
         def add_partition(table_name, name:, values:)
