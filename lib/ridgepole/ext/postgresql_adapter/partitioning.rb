@@ -61,6 +61,11 @@ module Ridgepole
                        from = match[:from].split(',').map(&:strip).map { |value| cast_value(value) }
                        to = match[:to].split(',').map(&:strip).map { |value| cast_value(value) }
                        { from: from, to: to }
+                     when :hash
+                       match = row[1].match(/FOR VALUES WITH \(modulus (?<modulus>\d+), remainder (?<remainder>\d+)\)/)
+                       modulus = cast_value(match[:modulus])
+                       remainder = cast_value(match[:remainder])
+                       { modulus: modulus, remainder: remainder }
                      else
                        raise NotImplementedError
                      end
@@ -104,6 +109,10 @@ module Ridgepole
                         from = values[:from].map { |v| quote_value(v) }.join(',')
                         to = values[:to].map { |v| quote_value(v) }.join(',')
                         "FOR VALUES FROM (#{from}) TO (#{to})"
+                      elsif values.key?(:modulus)
+                        modulus = values[:modulus]
+                        remainder = values[:remainder]
+                        "FOR VALUES WITH (modulus #{modulus}, remainder #{remainder})"
                       else
                         raise NotImplementedError
                       end

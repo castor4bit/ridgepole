@@ -354,6 +354,12 @@ add_partition("articles", :range, :id, partition_definitions: [{ name: 'p0', val
 ### Hash/Key Partitioning
 
 ```ruby
+create_table "articles", force: :cascade, options: "PARTITION BY HASH(id)" do |t|
+end
+
+# postgresql
+add_partition("articles", :hash, :id, partition_definitions: [{ name: 'articles_p0', values: { modulus: 3, remainder: 0 }}, { name: 'articles_p1', values: { modulus: 3, remainder: 1 }}, { name: 'articles_p2', values: { modulus: 3, remainder: 2 }}])
+
 # mysql
 add_partition("articles", :hash, :id, options: { partitions: 8, linear: true })
 add_partition("articles", :key, :id)

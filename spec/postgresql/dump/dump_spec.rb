@@ -73,6 +73,12 @@ describe 'Ridgepole::Client#dump' do
 
     it {
       expect(subject.dump).to match_fuzzy erbh(<<-ERB)
+        create_table "hash_partitions", id: false, options: "PARTITION BY HASH(id)", force: :cascade do |t|
+          t.integer "id", null: false
+          t.date "logdate", null: false
+        end
+        add_partition "hash_partitions", :hash, [:id], partition_definitions: [{ name: "hash_partitions_p0", values: {:modulus=>3, :remainder=>0} } ,{ name: "hash_partitions_p1", values: {:modulus=>3, :remainder=>1} } ,{ name: "hash_partitions_p2", values: {:modulus=>3, :remainder=>2} }]
+
         create_table "list_partitions", id: false, options: "PARTITION BY LIST(id)", force: :cascade do |t|
           t.integer "id", null: false
           t.date "logdate", null: false
