@@ -74,7 +74,8 @@ module Ridgepole
             { name: name, values: values }
           end
 
-          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, options[:type], options[:columns],
+          method = ActiveRecord::ConnectionAdapters::PartitionOptions.type_to_method(options[:type])
+          ActiveRecord::ConnectionAdapters::PartitionOptions.new(table_name, method, options[:columns],
                                                                  partition_definitions: partition_definitions)
         end
 

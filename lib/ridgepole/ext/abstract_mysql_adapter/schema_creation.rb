@@ -8,14 +8,8 @@ module Ridgepole
       module SchemaCreation
         def visit_PartitionOptions(o)
           sqls = o.partition_definitions.map { |partition_definition| accept partition_definition }
-          function = case o.type
-                     when :list
-                       "LIST COLUMNS(#{o.columns.map { |column| quote_column_name(column) }.join(',')})"
-                     when :range
-                       "RANGE COLUMNS(#{o.columns.map { |column| quote_column_name(column) }.join(',')})"
-                     else
-                       raise NotImplementedError
-                     end
+          columns = o.columns.map { |column| quote_column_name(column) }.join(',')
+          function = "#{o.method}(#{columns})"
           "ALTER TABLE #{quote_table_name(o.table)} PARTITION BY #{function} (#{sqls.join(',')})"
         end
 
