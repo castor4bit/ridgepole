@@ -224,7 +224,7 @@ See `mysql> show character set;` to find charset / collation pair for your syste
 
 ## Generated Column (MySQL)
 
-There should be NO extra white spaces in the expression (such as after comma).  
+There should be NO extra white spaces in the expression (such as after comma).
 Quotes in expression may cause the operations failure with MySQL 8.0.
 
 ```ruby
@@ -328,7 +328,14 @@ Apply `Schemafile`
 
 ## Partitioning
 
-**Notice:** PostgreSQL `PARTITION BY` must be specified with the create_table option.
+**Notice**
+
+* PostgreSQL `PARTITION BY` must be specified with the create_table option.
+* MySQL partitioning is currently partial support
+  * Subpartitioning is not supported
+  * RANGE/LIST partitioning is always treated as COLUMNS Partitioning
+  * HASH/KEY partitioning does not support expression
+  * ALGORITHM is not supported when creating or modifying a KEY partition
 
 ### List Partitioning
 
@@ -349,6 +356,23 @@ end
 add_partition("articles", :range, :id, partition_definitions: [{ name: 'p0', values: { from: 'MINVALUE', to: 5 }}, { name: 'p1', values: { from: 5, to: 10 } }])
 # mysql
 add_partition("articles", :range, :id, partition_definitions: [{ name: 'p0', values: { to: 5 }}, { name: 'p1', values: { to: 10 } }])
+```
+
+### Hash/Key Partitioning
+
+```ruby
+# postgresql
+create_table "articles", force: :cascade, options: "PARTITION BY HASH(id)" do |t|
+end
+
+add_partition("articles", :hash, :id, partition_definitions: [{ name: 'articles_p0', values: { modulus: 3, remainder: 0 }}, { name: 'articles_p1', values: { modulus: 3, remainder: 0 }}, { name: 'articles_p2', values: { modulus: 3, remainder: 0 }}])
+
+# mysql
+create_table "articles", force: :cascade do |t|
+end
+
+add_partition("articles", :hash, :id, options: { partitions: 8, linear: true })
+add_partition("articles", :key, :id)
 ```
 
 ## Run tests

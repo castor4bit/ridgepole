@@ -91,7 +91,7 @@ module Ridgepole
         }
       end
 
-      def add_partition(table_name, type, columns, partition_definitions: [])
+      def add_partition(table_name, type, columns, partition_definitions: [], options: {})
         partition_definitions.each do |partition_definition|
           values = partition_definition.fetch(:values)
           raise ArgumentError unless values.is_a?(Hash)
@@ -107,6 +107,8 @@ module Ridgepole
           type: type,
           columns: Array.wrap(columns),
           partition_definitions: partition_definitions,
+          partitions: options.fetch(:partitions, 0),
+          linear: options.fetch(:linear, false),
         }
       end
 
