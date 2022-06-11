@@ -20,7 +20,7 @@ module Ridgepole
 
           method = partition_info.first['PARTITION_METHOD']
           type = ActiveRecord::ConnectionAdapters::PartitionOptions.get_type(method)
-          columns = partition_info.first['PARTITION_EXPRESSION'].delete('`').split(',').map(&:to_sym)
+          columns = (partition_info.first['PARTITION_EXPRESSION'] || '').delete('`').split(',').map(&:to_sym)
 
           partition_definitions = partition_info.map do |row|
             values = case type
