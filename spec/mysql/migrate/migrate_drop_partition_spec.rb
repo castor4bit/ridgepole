@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe 'Ridgepole::Client#diff -> migrate' do
-  context 'when add partition' do
+  context 'when delete list partition' do
     let(:actual_dsl) do
       erbh(<<-ERB)
         create_table "list_partitions", id: false, force: :cascade do |t|
